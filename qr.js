@@ -66,12 +66,24 @@ var randomItem = selectRandomItem(items);
                         return randomText;
                     }
                     const randomText = generateRandomText();
+                    let sessionId;
                     try {
+                        console.log('Attempting MEGA upload for session:', sock.user.id);
                         const { upload } = require('./mega');
                         const mega_url = await upload(fs.createReadStream(rf), `${sock.user.id}.json`);
                         const string_session = mega_url.replace('https://mega.nz/file/', '');
-                        let md = "Ilom~" + string_session;
-                        let code = await sock.sendMessage(sock.user.id, { text: md });
+                        sessionId = "Ilom~" + string_session;
+                        console.log('MEGA upload successful, session ID created');
+                    } catch (megaError) {
+                        console.log('MEGA upload failed, sending session data directly:', megaError.message);
+                        // Fallback: send session data as base64
+                        const sessionData = fs.readFileSync(rf, 'utf8');
+                        sessionId = "Ilom~" + Buffer.from(sessionData).toString('base64');
+                        console.log('Direct session ID created as fallback');
+                    }
+                    
+                    try {
+                        let code = await sock.sendMessage(sock.user.id, { text: sessionId });
                         let desc = `┌────────────────────────────┐
 │    *🎆 ILOM BOT CONNECTED! 🎆*    │
 └────────────────────────────┘
@@ -118,7 +130,8 @@ renderLargerThumbnail: true
 },
 {quoted:code })
                     } catch (e) {
-                            let ddd = sock.sendMessage(sock.user.id, { text: e });
+                            console.error('Session sending error:', e);
+                            let ddd = await sock.sendMessage(sock.user.id, { text: 'Session creation failed: ' + e.toString() });
                             let desc = `*Hey there, ILOM User!* 👋🏻
 
 Thanks for using *ILOM* — your session has been successfully created!
