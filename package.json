@@ -1,0 +1,52 @@
+{
+  "name": "ilom-pair",
+  "version": "1.0.0",
+  "description": "A professional, modern WhatsApp bot session generator with beautiful UI and multi-platform deployment support.",
+  "main": "index.js",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "keywords": [
+    "whatsapp",
+    "bot",
+    "session",
+    "qr-code",
+    "pairing",
+    "baileys",
+    "nodejs",
+    "express",
+    "ilom"
+  ],
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js",
+    "stop": "pkill -f index.js",
+    "restart": "pkill -f index.js && node index.js",
+    "test": "echo \"Tests coming soon\" && exit 0"
+  },
+  "dependencies": {
+    "@adiwajshing/keyed-db": "^0.2.4",
+    "@whiskeysockets/baileys": "^6.7.19",
+    "async-mutex": "^0.4.1",
+    "awesome-phonenumber": "^2.73.0",
+    "body-parser": "^1.20.3",
+    "express": "^4.21.2",
+    "fs-extra": "^11.3.1",
+    "megajs": "^1.1.7",
+    "path": "^0.12.7",
+    "phone": "^3.1.30",
+    "pino": "^8.21.0",
+    "qrcode": "^1.5.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_USERNAME/ilom-session-generator.git"
+  },
+  "author": "ILOM Team",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/YOUR_USERNAME/ilom-session-generator/issues"
+  },
+  "homepage": "https://github.com/YOUR_USERNAME/ilom-session-generator#readme"
+}
