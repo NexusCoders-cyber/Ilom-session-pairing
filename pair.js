@@ -55,12 +55,9 @@ router.get('/', async (req, res) => {
             });
             
             if (!sock.authState.creds.registered) {
-                await delay(2000);
                 num = num.replace(/[^0-9]/g, '');
                 
                 const code = await sock.requestPairingCode(num);
-                
-                await delay(1000);
                 
                 if (!res.headersSent) {
                     await res.send({ code, sessionId: id });
@@ -73,7 +70,7 @@ router.get('/', async (req, res) => {
                 const { connection, lastDisconnect } = s;
                 
                 if (connection == "open") {
-                    await delay(3000);
+                    await delay(5000);
                     
                     let rf = __dirname + `/temp/${id}/creds.json`;
                     let sessionId;
