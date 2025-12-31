@@ -37,10 +37,10 @@ async function processSessionCredentials() {
                     const decodedData = decodeBase64Session(cleanId);
                     const sessionData = JSON.parse(decodedData);
                     await fs.writeJSON(path.join(SESSION_PATH, 'creds.json'), sessionData);
-                    logger.info('✅ Session credentials loaded from Ilom format with proper base64 padding');
+                    logger.info('✓ Session loaded from Ilom format');
                     return true;
                 } catch (err) {
-                    logger.error('Failed to parse Ilom session format:', err.message);
+                    logger.error('✗ Failed to parse Ilom session:', err.message);
                 }
             }
             
@@ -48,10 +48,10 @@ async function processSessionCredentials() {
                 try {
                     const sessionData = JSON.parse(sessionId);
                     await fs.writeJSON(path.join(SESSION_PATH, 'creds.json'), sessionData);
-                    logger.info('✅ Session credentials loaded from JSON format');
+                    logger.info('✓ Session loaded from JSON format');
                     return true;
                 } catch (err) {
-                    logger.error('Failed to parse JSON format:', err.message);
+                    logger.error('✗ Failed to parse JSON format:', err.message);
                 }
             }
             
@@ -59,28 +59,28 @@ async function processSessionCredentials() {
                 const decodedData = decodeBase64Session(sessionId);
                 const sessionData = JSON.parse(decodedData);
                 await fs.writeJSON(path.join(SESSION_PATH, 'creds.json'), sessionData);
-                logger.info('✅ Session credentials loaded from base64 format with proper padding');
+                logger.info('✓ Session loaded from base64 format');
                 return true;
             } catch (err) {
-                logger.warn('Base64 decode failed:', err.message);
+                logger.warn('⚠ Base64 decode failed:', err.message);
             }
             
             try {
                 const sessionData = JSON.parse(sessionId);
                 await fs.writeJSON(path.join(SESSION_PATH, 'creds.json'), sessionData);
-                logger.info('✅ Session credentials loaded from direct format');
+                logger.info('✓ Session loaded from direct format');
                 return true;
             } catch (err) {
-                logger.error('All session parsing methods failed:', err.message);
+                logger.error('✗ All session parsing methods failed:', err.message);
             }
             
             const sessionFile = path.join(SESSION_PATH, 'session_id.txt');
             await fs.writeFile(sessionFile, sessionId);
-            logger.warn('⚠️ Session saved as raw text, may need manual pairing');
+            logger.warn('⚠ Session saved as raw text, may need manual pairing');
             return false;
             
         } catch (error) {
-            logger.error('❌ Failed to process SESSION_ID:', error);
+            logger.error('✗ Failed to process SESSION_ID:', error.message);
             return false;
         }
     }
