@@ -12,6 +12,8 @@ const {
     Browsers
 } = require("@whiskeysockets/baileys");
 
+const activeSessions = new Map();
+
 function removeFile(FilePath) {
     if (!fs.existsSync(FilePath)) return false;
     fs.rmSync(FilePath, { recursive: true, force: true });
@@ -32,14 +34,20 @@ router.get('/', async (req, res) => {
         const { state, saveCreds } = await useMultiFileAuthState('./temp/' + id);
         
         try {
-            const browsers = ["Chrome", "Safari", "Firefox", "Edge"];
+            const browsers = ["Chrome (Linux)", "Chrome (macOS)", "Safari (iOS)", "Firefox (Windows)"];
             const randomBrowser = browsers[Math.floor(Math.random() * browsers.length)];
             
             let sock = makeWASocket({
                 auth: state,
                 printQRInTerminal: false,
                 logger: pino({ level: "silent" }),
-                browser: Browsers.macOS(randomBrowser)
+                browser: Browsers.ubuntu(randomBrowser),
+                syncFullHistory: false,
+                markOnlineOnConnect: false,
+                generateHighQualityLinkPreview: true,
+                getMessage: async (key) => {
+                    return { conversation: '' };
+                }
             });
             
             sock.ev.on('creds.update', saveCreds);
@@ -52,20 +60,32 @@ router.get('/', async (req, res) => {
                 }
                 
                 if (connection == "open") {
-                    await delay(5000);
+                    await delay(3000);
                     
                     let rf = __dirname + `/temp/${id}/creds.json`;
                     let sessionId;
+                    let sessionData;
+                    let credsJson;
                     
                     try {
-                        const sessionData = fs.readFileSync(rf, 'utf8');
+                        sessionData = fs.readFileSync(rf, 'utf8');
+                        credsJson = JSON.parse(sessionData);
                         const base64Data = Buffer.from(sessionData).toString('base64');
                         const paddedBase64 = ensureBase64Padding(base64Data);
                         sessionId = "Ilom~" + paddedBase64;
                         
-                        console.log('QR Session ID created successfully for:', sock.user.id);
+                        activeSessions.set(id, {
+                            sessionId: sessionId,
+                            credsJson: credsJson,
+                            rawJson: sessionData,
+                            timestamp: Date.now()
+                        });
+                        
+                        setTimeout(() => activeSessions.delete(id), 300000);
+                        
+                        console.log('✓ QR session created:', sock.user.id.split(':')[0]);
                     } catch (sessionError) {
-                        console.error('Session creation error:', sessionError);
+                        console.error('✗ Session error:', sessionError.message);
                         sessionId = "Session_Error";
                     }
                     
@@ -74,67 +94,77 @@ router.get('/', async (req, res) => {
                             text: sessionId 
                         });
                         
-                        const welcomeMessage = `╔════════════════════════════╗
-║   🎉 ILOM SESSION ACTIVE 🎉   ║
-╚════════════════════════════╝
+                        await delay(500);
+                        
+                        const welcomeMessage = `╔═══════════════════════════╗
+║   ✓ ILOM SESSION ACTIVE   ║
+╚═══════════════════════════╝
 
-✅ *QR Connection Successful!*
-Your WhatsApp bot session is now active.
+*QR Connection Established Successfully*
 
-🔐 *Session ID*
-Sent above - Keep it secure!
+Your WhatsApp bot session is now fully operational via QR code pairing.
 
-╔═══════════════════════╗
-║   ⚠️  SECURITY NOTICE  ⚠️   ║
-╚═══════════════════════╝
+╔══════════════════════╗
+║   SECURITY NOTICE    ║
+╚══════════════════════╝
+
+⚠️ *Keep Your Session Secure*
 • Never share your session ID
-• Store it in a secure location
-• Use only for authorized bots
+• Store in a secure location
+• Use only for authorized purposes
+• Regenerate if compromised
 
-📱 *ILOM Features*
-✓ Advanced AI capabilities
-✓ Multi-platform support
-✓ Secure session management
-✓ Real-time updates
+✓ *Platform Features*
+• AI-powered responses
+• Multi-device support  
+• Secure encryption
+• Real-time sync
+• Auto-backup
 
-🌐 *Support & Community*
-• Technical documentation
-• Active community support
-• Regular feature updates
+📱 *Getting Started*
+1. Save your session ID securely
+2. Configure your bot settings
+3. Deploy to your preferred platform
+4. Monitor activity & logs
 
+🌐 *Need Support?*
+Visit our documentation for setup guides, API references, and troubleshooting help.
+
+━━━━━━━━━━━━━━━━━━━━━━
 © 2025 ILOM Platform
-Stay secure, stay connected! 🚀`;
+Secure • Reliable • Advanced
+━━━━━━━━━━━━━━━━━━━━━━`;
                         
                         await sock.sendMessage(sock.user.id, {
-                            text: welcomeMessage,
-                            contextInfo: {
-                                externalAdReply: {
-                                    title: "ILOM - QR Session Connected",
-                                    body: "Advanced WhatsApp Bot Platform",
-                                    thumbnailUrl: "https://files.catbox.moe/bqs70b.jpg",
-                                    sourceUrl: "https://ilom.bot",
-                                    mediaType: 1,
-                                    renderLargerThumbnail: true
-                                }  
-                            }
+                            text: welcomeMessage
                         });
+                        
+                        await delay(500);
+                        
+                        await sock.sendMessage(sock.user.id, {
+                            text: "🎉 *Setup Complete!*\n\nYour bot is ready to use. Check the session ID above and keep it safe.\n\n_This message confirms your device has been successfully linked._"
+                        });
+                        
                     } catch (sendError) {
-                        console.error('Message sending error:', sendError);
+                        console.error('✗ Message error:', sendError.message);
                     }
                     
-                    await delay(100);
+                    await delay(1000);
                     await sock.ws.close();
-                    await removeFile('./temp/' + id);
-                    console.log(`✅ ${sock.user.id} - QR Session created successfully`);
+                    
+                    setTimeout(() => {
+                        removeFile('./temp/' + id);
+                        console.log(`✓ Cleanup completed for: ${sock.user.id.split(':')[0]}`);
+                    }, 5000);
                     
                 } else if (connection === "close" && lastDisconnect && lastDisconnect.error && lastDisconnect.error.output.statusCode != 401) {
-                    await delay(100);
+                    await delay(1000);
                     ILOM_QR_CODE();
                 }
             });
             
         } catch (err) {
-            console.error("Service error:", err);
+            console.error("✗ Service error:", err.message);
             await removeFile('./temp/' + id);
             if (!res.headersSent) {
                 await res.send({ code: "Service Unavailable" });
@@ -143,6 +173,52 @@ Stay secure, stay connected! 🚀`;
     }
     
     await ILOM_QR_CODE();
+});
+
+router.get('/session/:id', async (req, res) => {
+    const sessionId = req.params.id;
+    const format = req.query.format || 'base64';
+    
+    const session = activeSessions.get(sessionId);
+    
+    if (!session) {
+        return res.status(404).json({ 
+            error: 'Session not found or expired',
+            message: 'Session may have expired after 5 minutes'
+        });
+    }
+    
+    try {
+        switch(format) {
+            case 'json':
+                res.json(session.credsJson);
+                break;
+                
+            case 'raw':
+                res.setHeader('Content-Type', 'application/json');
+                res.send(session.rawJson);
+                break;
+                
+            case 'download':
+                res.setHeader('Content-Disposition', 'attachment; filename=creds.json');
+                res.setHeader('Content-Type', 'application/json');
+                res.send(session.rawJson);
+                break;
+                
+            case 'base64':
+            default:
+                res.json({ 
+                    sessionId: session.sessionId,
+                    format: 'Ilom~base64'
+                });
+                break;
+        }
+    } catch (error) {
+        res.status(500).json({ 
+            error: 'Failed to retrieve session',
+            message: error.message 
+        });
+    }
 });
 
 module.exports = router;
