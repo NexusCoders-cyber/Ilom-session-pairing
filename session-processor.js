@@ -5,6 +5,23 @@ const pino = require("pino");
 const logger = pino({ level: "info" });
 const SESSION_PATH = './session';
 
+function ensureBase64Padding(base64String) {
+    const padding = base64String.length % 4;
+    if (padding > 0) {
+        return base64String + '='.repeat(4 - padding);
+    }
+    return base64String;
+}
+
+function decodeBase64Session(encodedData) {
+    try {
+        const paddedData = ensureBase64Padding(encodedData);
+        return Buffer.from(paddedData, 'base64').toString('utf8');
+    } catch (error) {
+        throw new Error('Failed to decode base64 session data');
+    }
+}
+
 async function processSessionCredentials() {
     if (process.env.SESSION_ID && process.env.SESSION_ID.trim() !== '') {
         try {
@@ -14,32 +31,38 @@ async function processSessionCredentials() {
             await fs.ensureDir(SESSION_PATH);
             
             if (sessionId.startsWith('Ilom~') || sessionId.includes('Ilom~')) {
-                const cleanId = sessionId.replace('Ilom~', '');
+                const cleanId = sessionId.replace(/^Ilom~/, '');
+                
                 try {
-                    const sessionData = JSON.parse(Buffer.from(cleanId, 'base64').toString());
+                    const decodedData = decodeBase64Session(cleanId);
+                    const sessionData = JSON.parse(decodedData);
                     await fs.writeJSON(path.join(SESSION_PATH, 'creds.json'), sessionData);
-                    logger.info('✅ Session credentials loaded from Ilom format');
+                    logger.info('✅ Session credentials loaded from Ilom format with proper base64 padding');
                     return true;
                 } catch (err) {
-                    logger.warn('Failed to parse Ilom session format');
+                    logger.error('Failed to parse Ilom session format:', err.message);
                 }
             }
             
             if (sessionId.startsWith('{') && sessionId.endsWith('}')) {
-                const sessionData = JSON.parse(sessionId);
-                await fs.writeJSON(path.join(SESSION_PATH, 'creds.json'), sessionData);
-                logger.info('✅ Session credentials loaded from JSON format');
-                return true;
+                try {
+                    const sessionData = JSON.parse(sessionId);
+                    await fs.writeJSON(path.join(SESSION_PATH, 'creds.json'), sessionData);
+                    logger.info('✅ Session credentials loaded from JSON format');
+                    return true;
+                } catch (err) {
+                    logger.error('Failed to parse JSON format:', err.message);
+                }
             }
             
             try {
-                const decodedData = Buffer.from(sessionId, 'base64').toString();
+                const decodedData = decodeBase64Session(sessionId);
                 const sessionData = JSON.parse(decodedData);
                 await fs.writeJSON(path.join(SESSION_PATH, 'creds.json'), sessionData);
-                logger.info('✅ Session credentials loaded from base64 format');
+                logger.info('✅ Session credentials loaded from base64 format with proper padding');
                 return true;
             } catch (err) {
-                logger.warn('Base64 decode failed, trying direct format...');
+                logger.warn('Base64 decode failed:', err.message);
             }
             
             try {
@@ -48,7 +71,7 @@ async function processSessionCredentials() {
                 logger.info('✅ Session credentials loaded from direct format');
                 return true;
             } catch (err) {
-                logger.error('All session parsing methods failed');
+                logger.error('All session parsing methods failed:', err.message);
             }
             
             const sessionFile = path.join(SESSION_PATH, 'session_id.txt');
@@ -62,7 +85,12 @@ async function processSessionCredentials() {
         }
     }
     
+    logger.info('No SESSION_ID found in environment variables');
     return false;
 }
 
-module.exports = { processSessionCredentials };
+module.exports = { 
+    processSessionCredentials,
+    ensureBase64Padding,
+    decodeBase64Session
+};
