@@ -6,7 +6,7 @@
   <title>ILOM - Phone Pairing</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
     * {
@@ -16,8 +16,8 @@
     }
 
     body {
-      font-family: 'Outfit', sans-serif;
-      background: #000000;
+      font-family: 'Inter', sans-serif;
+      background: #0a0a0f;
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -29,28 +29,25 @@
     body::before {
       content: '';
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      inset: 0;
       background: 
-        radial-gradient(circle at 30% 50%, rgba(16, 185, 129, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 70% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 50%);
-      animation: pulse 8s ease-in-out infinite;
+        radial-gradient(circle at 30% 50%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 70% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
+      animation: breathe 8s ease-in-out infinite;
       z-index: 0;
     }
 
     .container {
-      background: rgba(10, 10, 15, 0.85);
-      backdrop-filter: blur(40px);
-      border-radius: 32px;
+      background: rgba(15, 15, 20, 0.7);
+      backdrop-filter: blur(60px);
+      border-radius: 40px;
       padding: 3.5rem 3rem;
       box-shadow: 
-        0 0 80px rgba(16, 185, 129, 0.2),
+        0 0 0 1px rgba(255, 255, 255, 0.05),
+        0 20px 60px rgba(0, 0, 0, 0.5),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.1);
       text-align: center;
-      max-width: 540px;
+      max-width: 600px;
       width: 92%;
       position: relative;
       z-index: 10;
@@ -63,123 +60,134 @@
       top: 0;
       left: 0;
       right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, transparent, #10b981 50%, transparent);
+      height: 4px;
+      background: linear-gradient(90deg, 
+        transparent, 
+        #10b981 30%, 
+        #059669 70%, 
+        transparent
+      );
       background-size: 200% 100%;
-      animation: shimmer 2s linear infinite;
+      animation: shimmer 3s linear infinite;
+      border-radius: 40px 40px 0 0;
     }
 
     .logo {
-      width: 90px;
-      height: 90px;
+      width: 100px;
+      height: 100px;
       margin: 0 auto 2rem;
       background: linear-gradient(135deg, #10b981, #059669);
-      border-radius: 22px;
+      border-radius: 25px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2.5rem;
+      font-size: 2.8rem;
       color: white;
-      box-shadow: 0 20px 60px rgba(16, 185, 129, 0.4);
-      animation: float 3s ease-in-out infinite;
+      box-shadow: 0 25px 70px rgba(16, 185, 129, 0.5);
+      animation: float 4s ease-in-out infinite;
     }
 
     h1 {
-      font-size: 2.2rem;
+      font-size: 2.5rem;
       font-weight: 900;
       background: linear-gradient(135deg, #ffffff, #a0ffd9);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       margin-bottom: 0.8rem;
+      letter-spacing: -0.03em;
     }
 
     .subtitle {
-      color: rgba(255, 255, 255, 0.6);
-      font-size: 1.05rem;
-      margin-bottom: 2.5rem;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 1.1rem;
+      margin-bottom: 3rem;
+      font-weight: 400;
     }
 
     .form-container {
-      background: rgba(255, 255, 255, 0.03);
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(16, 185, 129, 0.02));
       border: 1px solid rgba(16, 185, 129, 0.2);
-      border-radius: 20px;
-      padding: 2rem;
+      border-radius: 24px;
+      padding: 2.5rem;
       margin-bottom: 2rem;
     }
 
     .form-title {
-      font-size: 1.2rem;
+      font-size: 1.3rem;
       font-weight: 700;
       color: #10b981;
       margin-bottom: 0.8rem;
     }
 
     .form-description {
-      color: rgba(255, 255, 255, 0.5);
-      font-size: 0.95rem;
-      margin-bottom: 1.8rem;
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 1rem;
+      margin-bottom: 2rem;
     }
 
     .input-group {
       display: flex;
-      gap: 0.8rem;
+      gap: 1rem;
     }
 
     .phone-input {
       flex: 1;
-      padding: 1.1rem 1.3rem;
-      border: 2px solid rgba(255, 255, 255, 0.1);
-      border-radius: 14px;
-      font-size: 1.05rem;
+      padding: 1.3rem 1.5rem;
+      border: 2px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      font-size: 1.1rem;
       font-family: inherit;
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.03);
       color: #ffffff;
       transition: all 0.3s ease;
       outline: none;
+      font-weight: 500;
     }
 
     .phone-input::placeholder {
-      color: rgba(255, 255, 255, 0.3);
+      color: rgba(255, 255, 255, 0.25);
     }
 
     .phone-input:focus {
       border-color: #10b981;
       background: rgba(16, 185, 129, 0.05);
-      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
     }
 
     .submit-btn {
       background: linear-gradient(135deg, #10b981, #059669);
       color: white;
       border: none;
-      border-radius: 14px;
-      padding: 1.1rem 2rem;
-      font-size: 1.05rem;
+      border-radius: 16px;
+      padding: 1.3rem 2.5rem;
+      font-size: 1.1rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s ease;
       font-family: inherit;
       display: flex;
       align-items: center;
-      gap: 0.6rem;
+      gap: 0.7rem;
+      white-space: nowrap;
     }
 
     .submit-btn:hover:not(:disabled) {
       background: linear-gradient(135deg, #059669, #047857);
       transform: translateY(-2px);
-      box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
+      box-shadow: 0 15px 40px rgba(16, 185, 129, 0.5);
     }
 
     .submit-btn:disabled {
-      opacity: 0.5;
+      opacity: 0.6;
       cursor: not-allowed;
+      transform: none;
     }
 
     .result-container {
       background: rgba(16, 185, 129, 0.05);
       border: 1px solid rgba(16, 185, 129, 0.2);
-      border-radius: 20px;
-      padding: 2rem;
+      border-radius: 24px;
+      padding: 2.5rem;
       margin-top: 2rem;
       display: none;
     }
@@ -195,86 +203,154 @@
     }
 
     .pairing-code {
-      font-size: 2.8rem;
+      font-size: 3.2rem;
       font-weight: 900;
       font-family: 'Courier New', monospace;
       color: #10b981;
       background: rgba(16, 185, 129, 0.1);
-      padding: 1.5rem;
-      border-radius: 16px;
+      padding: 1.8rem;
+      border-radius: 20px;
       margin: 1.5rem 0;
-      letter-spacing: 0.5rem;
+      letter-spacing: 0.6rem;
       cursor: pointer;
       transition: all 0.3s ease;
       border: 2px solid rgba(16, 185, 129, 0.3);
+      position: relative;
+    }
+
+    .pairing-code::before {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      background: linear-gradient(45deg, #10b981, #059669);
+      border-radius: 23px;
+      z-index: -1;
+      opacity: 0;
+      filter: blur(15px);
+      transition: opacity 0.3s;
+    }
+
+    .pairing-code:hover::before {
+      opacity: 0.6;
     }
 
     .pairing-code:hover {
       background: rgba(16, 185, 129, 0.15);
       transform: scale(1.02);
-      box-shadow: 0 10px 40px rgba(16, 185, 129, 0.3);
+      box-shadow: 0 15px 50px rgba(16, 185, 129, 0.4);
     }
 
     .copy-hint {
       color: rgba(16, 185, 129, 0.8);
-      font-size: 0.9rem;
-      margin-top: 0.8rem;
+      font-size: 0.95rem;
+      margin-top: 1rem;
+      font-weight: 500;
+    }
+
+    .download-section {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: rgba(59, 130, 246, 0.05);
+      border-radius: 18px;
+      border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    .download-title {
+      color: #3b82f6;
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+    }
+
+    .download-buttons {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.8rem;
+    }
+
+    .download-btn {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15));
+      color: white;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 12px;
+      padding: 1rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .download-btn:hover {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(139, 92, 246, 0.25));
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
     }
 
     .steps {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-      margin-top: 2.5rem;
-      padding-top: 2rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.2rem;
+      margin-top: 3rem;
+      padding-top: 2.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     .step {
-      padding: 1.2rem;
-      background: rgba(255, 255, 255, 0.03);
-      border-radius: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 1.5rem;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    .step:hover {
+      border-color: rgba(16, 185, 129, 0.3);
+      transform: translateY(-3px);
     }
 
     .step-number {
-      width: 28px;
-      height: 28px;
+      width: 32px;
+      height: 32px;
       background: linear-gradient(135deg, #10b981, #059669);
       color: white;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       font-weight: 700;
-      margin-bottom: 0.8rem;
+      margin-bottom: 1rem;
     }
 
     .step h3 {
-      font-size: 1rem;
+      font-size: 1.05rem;
       font-weight: 700;
       color: #ffffff;
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.5rem;
     }
 
     .step p {
-      font-size: 0.85rem;
-      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.4);
     }
 
     .footer {
-      margin-top: 2.5rem;
-      padding-top: 2rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      color: rgba(255, 255, 255, 0.4);
+      margin-top: 3rem;
+      padding-top: 2.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      color: rgba(255, 255, 255, 0.3);
       font-size: 0.95rem;
     }
 
     @keyframes slideUp {
       from {
         opacity: 0;
-        transform: translateY(50px);
+        transform: translateY(60px);
       }
       to {
         opacity: 1;
@@ -284,7 +360,7 @@
 
     @keyframes float {
       0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
+      50% { transform: translateY(-12px); }
     }
 
     @keyframes shimmer {
@@ -293,18 +369,30 @@
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+      from { 
+        opacity: 0; 
+        transform: translateY(30px); 
+      }
+      to { 
+        opacity: 1; 
+        transform: translateY(0); 
+      }
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.8; }
+    @keyframes breathe {
+      0%, 100% { 
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% { 
+        opacity: 0.8;
+        transform: scale(1.05);
+      }
     }
 
     @media (max-width: 600px) {
       .container {
-        padding: 2.5rem 2rem;
+        padding: 3rem 2rem;
       }
       
       .input-group {
@@ -312,8 +400,16 @@
       }
       
       .pairing-code {
-        font-size: 2rem;
-        letter-spacing: 0.3rem;
+        font-size: 2.2rem;
+        letter-spacing: 0.4rem;
+      }
+
+      .steps {
+        grid-template-columns: 1fr;
+      }
+
+      .download-buttons {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -325,7 +421,7 @@
     </div>
     
     <h1>Phone Pairing</h1>
-    <p class="subtitle">Connect using your phone number</p>
+    <p class="subtitle">Generate your 8-digit pairing code</p>
     
     <div class="form-container">
       <div class="form-title">Enter Phone Number</div>
@@ -338,6 +434,7 @@
           id="number" 
           placeholder="+1234567890" 
           required
+          autocomplete="tel"
         >
         <button class="submit-btn" id="submit">
           <i class="fas fa-paper-plane"></i>
@@ -354,22 +451,22 @@
       <div class="step">
         <div class="step-number">1</div>
         <h3>Enter Number</h3>
-        <p>Type WhatsApp number with code</p>
+        <p>Input your WhatsApp number with country code</p>
       </div>
       <div class="step">
         <div class="step-number">2</div>
         <h3>Get Code</h3>
-        <p>Receive 8-digit pairing code</p>
+        <p>Receive your 8-digit pairing code instantly</p>
       </div>
       <div class="step">
         <div class="step-number">3</div>
         <h3>Link Device</h3>
-        <p>Enter code in WhatsApp settings</p>
+        <p>Enter code in WhatsApp → Settings → Linked Devices</p>
       </div>
     </div>
     
     <div class="footer">
-      <p>&copy; 2025 ILOM. All rights reserved.</p>
+      <p>&copy; 2025 ILOM Platform. All rights reserved.</p>
     </div>
   </div>
   
@@ -381,13 +478,27 @@
     const numberInput = document.getElementById('number');
     
     let isProcessing = false;
+    let currentSessionId = null;
     
     async function copyToClipboard(text) {
       try {
         await navigator.clipboard.writeText(text);
         return true;
       } catch (err) {
-        return false;
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+          return true;
+        } catch (e) {
+          document.body.removeChild(textArea);
+          return false;
+        }
       }
     }
     
@@ -395,6 +506,47 @@
       resultDiv.className = `result-container show ${isError ? 'error' : ''}`;
       pairDiv.innerHTML = content;
     }
+
+    async function downloadSession(format) {
+      if (!currentSessionId) return;
+      
+      try {
+        const response = await axios.get(`/code/session/${currentSessionId}?format=${format}`, {
+          responseType: format === 'download' ? 'blob' : 'json'
+        });
+        
+        if (format === 'download') {
+          const url = window.URL.createObjectURL(new Blob([response.data]));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', 'creds.json');
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        } else if (format === 'json' || format === 'raw') {
+          const dataStr = JSON.stringify(response.data, null, 2);
+          const dataBlob = new Blob([dataStr], {type: 'application/json'});
+          const url = window.URL.createObjectURL(dataBlob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', `session-${format}.json`);
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        } else {
+          await copyToClipboard(response.data.sessionId);
+          alert('Base64 session ID copied to clipboard!');
+        }
+      } catch (error) {
+        alert('Failed to download session: ' + error.message);
+      }
+    }
+    
+    numberInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        submitBtn.click();
+      }
+    });
     
     submitBtn.addEventListener('click', async (e) => {
       e.preventDefault();
@@ -406,9 +558,9 @@
       if (!phoneNumber) {
         showResult(`
           <div style="text-align: center; color: #ef4444;">
-            <i class="fas fa-exclamation-triangle" style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
-            <h3 style="color: #ef4444; margin-bottom: 0.5rem; font-size: 1.3rem;">Missing Phone Number</h3>
-            <p style="color: rgba(255,255,255,0.6);">Please enter your WhatsApp number</p>
+            <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1.5rem; opacity: 0.8;"></i>
+            <h3 style="color: #ef4444; margin-bottom: 0.8rem; font-size: 1.4rem; font-weight: 700;">Phone Number Required</h3>
+            <p style="color: rgba(255,255,255,0.5); font-size: 1rem;">Please enter your WhatsApp phone number to continue</p>
           </div>
         `, true);
         return;
@@ -417,9 +569,9 @@
       if (phoneNumber.length < 10) {
         showResult(`
           <div style="text-align: center; color: #ef4444;">
-            <i class="fas fa-times-circle" style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
-            <h3 style="color: #ef4444; margin-bottom: 0.5rem; font-size: 1.3rem;">Invalid Number</h3>
-            <p style="color: rgba(255,255,255,0.6);">Please enter a valid phone number</p>
+            <i class="fas fa-times-circle" style="font-size: 3rem; margin-bottom: 1.5rem; opacity: 0.8;"></i>
+            <h3 style="color: #ef4444; margin-bottom: 0.8rem; font-size: 1.4rem; font-weight: 700;">Invalid Number Format</h3>
+            <p style="color: rgba(255,255,255,0.5); font-size: 1rem;">Please enter a valid phone number with country code</p>
           </div>
         `, true);
         return;
@@ -431,15 +583,16 @@
       
       showResult(`
         <div style="text-align: center; color: #10b981;">
-          <i class="fas fa-cog fa-spin" style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
-          <h3 style="color: #10b981; margin-bottom: 0.5rem; font-size: 1.3rem;">Generating Code</h3>
-          <p style="color: rgba(255,255,255,0.6);">Please wait...</p>
+          <i class="fas fa-cog fa-spin" style="font-size: 3rem; margin-bottom: 1.5rem;"></i>
+          <h3 style="color: #10b981; margin-bottom: 0.8rem; font-size: 1.4rem; font-weight: 700;">Generating Your Code</h3>
+          <p style="color: rgba(255,255,255,0.5); font-size: 1rem;">Please wait while we create your pairing code...</p>
         </div>
       `);
       
       try {
         const response = await axios(`/code?number=${phoneNumber}`);
         const code = response.data.code || 'Service Unavailable';
+        currentSessionId = response.data.sessionId;
         
         if (code === 'Service Unavailable') {
           throw new Error('Service temporarily unavailable');
@@ -447,20 +600,36 @@
         
         showResult(`
           <div style="text-align: center;">
-            <i class="fas fa-check-circle" style="font-size: 2.5rem; color: #10b981; margin-bottom: 1rem;"></i>
-            <h3 style="color: #10b981; margin-bottom: 1rem; font-size: 1.3rem;">Code Generated!</h3>
+            <i class="fas fa-check-circle" style="font-size: 3rem; color: #10b981; margin-bottom: 1.5rem;"></i>
+            <h3 style="color: #10b981; margin-bottom: 1.5rem; font-size: 1.4rem; font-weight: 700;">Code Generated Successfully!</h3>
             <div class="pairing-code" onclick="copyCode('${code}')" id="codeDisplay">
               ${code}
             </div>
             <p class="copy-hint">
-              <i class="fas fa-copy"></i> Click to copy
+              <i class="fas fa-copy"></i> Click code to copy
             </p>
-            <div style="margin-top: 1.5rem; padding: 1.2rem; background: rgba(16, 185, 129, 0.05); border-radius: 14px; border: 1px solid rgba(16, 185, 129, 0.2);">
-              <p style="color: #10b981; font-weight: 600; margin-bottom: 0.8rem;">Next Steps:</p>
-              <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 0.3rem;">1. Open WhatsApp on your phone</p>
-              <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 0.3rem;">2. Go to Settings → Linked Devices</p>
-              <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 0.3rem;">3. Tap "Link a Device" → "Link with phone number"</p>
-              <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">4. Enter the code above</p>
+            <div style="margin-top: 2rem; padding: 1.5rem; background: rgba(16, 185, 129, 0.05); border-radius: 18px; border: 1px solid rgba(16, 185, 129, 0.2); text-align: left;">
+              <p style="color: #10b981; font-weight: 700; margin-bottom: 1rem; font-size: 1.1rem;"><i class="fas fa-info-circle"></i> Next Steps:</p>
+              <p style="color: rgba(255,255,255,0.7); font-size: 0.95rem; margin-bottom: 0.5rem; padding-left: 0.5rem;">1. Open WhatsApp on your phone</p>
+              <p style="color: rgba(255,255,255,0.7); font-size: 0.95rem; margin-bottom: 0.5rem; padding-left: 0.5rem;">2. Go to Settings → Linked Devices</p>
+              <p style="color: rgba(255,255,255,0.7); font-size: 0.95rem; margin-bottom: 0.5rem; padding-left: 0.5rem;">3. Tap "Link a Device" → "Link with phone number"</p>
+              <p style="color: rgba(255,255,255,0.7); font-size: 0.95rem; padding-left: 0.5rem;">4. Enter the code above</p>
+              <p style="color: #10b981; font-size: 0.85rem; margin-top: 1rem; font-weight: 600;"><i class="fas fa-clock"></i> Code expires in 60 seconds</p>
+            </div>
+            <div class="download-section">
+              <div class="download-title"><i class="fas fa-download"></i> Download Session</div>
+              <p style="color: rgba(255,255,255,0.4); font-size: 0.9rem; margin-bottom: 1rem;">After pairing, download your session credentials</p>
+              <div class="download-buttons">
+                <button class="download-btn" onclick="downloadSession('download')">
+                  <i class="fas fa-file-download"></i> creds.json
+                </button>
+                <button class="download-btn" onclick="downloadSession('json')">
+                  <i class="fas fa-code"></i> JSON
+                </button>
+                <button class="download-btn" onclick="downloadSession('base64')">
+                  <i class="fas fa-key"></i> Base64
+                </button>
+              </div>
             </div>
           </div>
         `);
@@ -469,9 +638,10 @@
         console.error('Error:', error);
         showResult(`
           <div style="text-align: center; color: #ef4444;">
-            <i class="fas fa-exclamation-circle" style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
-            <h3 style="color: #ef4444; margin-bottom: 0.5rem; font-size: 1.3rem;">Connection Failed</h3>
-            <p style="color: rgba(255,255,255,0.6);">Unable to generate code. Please try again.</p>
+            <i class="fas fa-exclamation-circle" style="font-size: 3rem; margin-bottom: 1.5rem; opacity: 0.8;"></i>
+            <h3 style="color: #ef4444; margin-bottom: 0.8rem; font-size: 1.4rem; font-weight: 700;">Connection Failed</h3>
+            <p style="color: rgba(255,255,255,0.5); font-size: 1rem; margin-bottom: 1rem;">Unable to generate pairing code. Please try again.</p>
+            <p style="color: rgba(255,255,255,0.3); font-size: 0.85rem;">If the problem persists, check your internet connection or try again later.</p>
           </div>
         `, true);
       } finally {
@@ -486,15 +656,18 @@
       const codeDisplay = document.getElementById('codeDisplay');
       
       if (success && codeDisplay) {
+        const originalText = codeDisplay.innerHTML;
         const originalBg = codeDisplay.style.background;
-        codeDisplay.style.background = 'rgba(16, 185, 129, 0.2)';
-        codeDisplay.innerHTML = 'COPIED!';
+        codeDisplay.style.background = 'rgba(16, 185, 129, 0.25)';
+        codeDisplay.innerHTML = '✓ COPIED!';
         setTimeout(() => {
           codeDisplay.style.background = originalBg;
-          codeDisplay.innerHTML = code;
-        }, 1500);
+          codeDisplay.innerHTML = originalText;
+        }, 2000);
       }
     }
+
+    window.downloadSession = downloadSession;
   </script>
 </body>
 </html>
