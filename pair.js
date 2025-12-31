@@ -3,28 +3,39 @@ const express = require('express');
 const fs = require('fs');
 let router = express.Router();
 const pino = require("pino");
-const { default: makeWASocket, useMultiFileAuthState, delay, Browsers, makeCacheableSignalKeyStore, getAggregateVotesInPollMessage, DisconnectReason, WA_DEFAULT_EPHEMERAL, jidNormalizedUser, proto, getDevice, generateWAMessageFromContent, fetchLatestBaileysVersion, makeInMemoryStore, getContentType, generateForwardMessageContent, downloadContentFromMessage, jidDecode } = require('@whiskeysockets/baileys')
-
+const { 
+    default: makeWASocket, 
+    useMultiFileAuthState, 
+    delay, 
+    Browsers, 
+    makeCacheableSignalKeyStore, 
+    DisconnectReason 
+} = require('@whiskeysockets/baileys');
 const { upload } = require('./mega');
+
 function removeFile(FilePath) {
     if (!fs.existsSync(FilePath)) return false;
     fs.rmSync(FilePath, { recursive: true, force: true });
 }
+
+function ensureBase64Padding(base64String) {
+    const padding = base64String.length % 4;
+    if (padding > 0) {
+        return base64String + '='.repeat(4 - padding);
+    }
+    return base64String;
+}
+
 router.get('/', async (req, res) => {
     const id = makeid();
     let num = req.query.number;
+    
     async function ILOM_PAIR_CODE() {
-        const {
-            state,
-            saveCreds
-        } = await useMultiFileAuthState('./temp/' + id);
+        const { state, saveCreds } = await useMultiFileAuthState('./temp/' + id);
+        
         try {
-var items = ["Safari"];
-function selectRandomItem(array) {
-  var randomIndex = Math.floor(Math.random() * array.length);
-  return array[randomIndex];
-}
-var randomItem = selectRandomItem(items);
+            const browsers = ["Chrome", "Safari", "Firefox", "Edge"];
+            const randomBrowser = browsers[Math.floor(Math.random() * browsers.length)];
             
             let sock = makeWASocket({
                 auth: {
@@ -35,8 +46,9 @@ var randomItem = selectRandomItem(items);
                 generateHighQualityLinkPreview: true,
                 logger: pino({ level: "fatal" }).child({ level: "fatal" }),
                 syncFullHistory: false,
-                browser: Browsers.macOS(randomItem)
+                browser: Browsers.macOS(randomBrowser)
             });
+            
             if (!sock.authState.creds.registered) {
                 await delay(1500);
                 num = num.replace(/[^0-9]/g, '');
@@ -45,137 +57,104 @@ var randomItem = selectRandomItem(items);
                     await res.send({ code });
                 }
             }
+            
             sock.ev.on('creds.update', saveCreds);
+            
             sock.ev.on("connection.update", async (s) => {
-
-    const {
-                    connection,
-                    lastDisconnect
-                } = s;
+                const { connection, lastDisconnect } = s;
                 
                 if (connection == "open") {
                     await delay(5000);
-                    let data = fs.readFileSync(__dirname + `/temp/${id}/creds.json`);
+                    
                     let rf = __dirname + `/temp/${id}/creds.json`;
-                    function generateRandomText() {
-                        const prefix = "3EB";
-                        const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-                        let randomText = prefix;
-                        for (let i = prefix.length; i < 22; i++) {
-                            const randomIndex = Math.floor(Math.random() * characters.length);
-                            randomText += characters.charAt(randomIndex);
-                        }
-                        return randomText;
-                    }
-                    const randomText = generateRandomText();
                     let sessionId;
+                    
                     try {
-                        console.log('Attempting MEGA upload for session:', sock.user.id);
-                        const { upload } = require('./mega');
-                        const mega_url = await upload(fs.createReadStream(rf), `${sock.user.id}.json`);
-                        const string_session = mega_url.replace('https://mega.nz/file/', '');
-                        sessionId = "Ilom~" + string_session;
-                        console.log('MEGA upload successful, session ID created');
-                    } catch (megaError) {
-                        console.log('MEGA upload failed, sending session data directly:', megaError.message);
-                        // Fallback: send session data as base64
                         const sessionData = fs.readFileSync(rf, 'utf8');
-                        sessionId = "Ilom~" + Buffer.from(sessionData).toString('base64');
-                        console.log('Direct session ID created as fallback');
+                        const base64Data = Buffer.from(sessionData).toString('base64');
+                        const paddedBase64 = ensureBase64Padding(base64Data);
+                        sessionId = "Ilom~" + paddedBase64;
+                        
+                        console.log('Session ID created successfully for:', sock.user.id);
+                    } catch (sessionError) {
+                        console.error('Session creation error:', sessionError);
+                        sessionId = "Session_Error";
                     }
                     
                     try {
-                        let code = await sock.sendMessage(sock.user.id, { text: sessionId });
-                        let desc = `*Hey there, ILOM User!* 👋🏻
+                        await sock.sendMessage(sock.user.id, { 
+                            text: sessionId 
+                        });
+                        
+                        const welcomeMessage = `╔════════════════════════════╗
+║   🎉 ILOM SESSION ACTIVE 🎉   ║
+╚════════════════════════════╝
 
-Thanks for using *ILOM* — your session has been successfully created!
+✅ *Connection Successful!*
+Your WhatsApp bot session is now active.
 
-🔐 *Session ID:* Sent above  
-⚠️ *Keep it safe!* Do NOT share this ID with anyone.
+🔐 *Session ID*
+Sent above - Keep it secure!
 
-——————
+╔═══════════════════════╗
+║   ⚠️  SECURITY NOTICE  ⚠️   ║
+╚═══════════════════════╝
+• Never share your session ID
+• Store it in a secure location
+• Use only for authorized bots
 
-*✅ Stay Updated:*  
-Connect with ILOM Bot Network
+📱 *ILOM Features*
+✓ Advanced AI capabilities
+✓ Multi-platform support
+✓ Secure session management
+✓ Real-time updates
 
-*💻 Source Code:*  
-Explore ILOM project capabilities
+🌐 *Support & Community*
+• Technical documentation
+• Active community support
+• Regular feature updates
 
-——————
-
-> *© Powered by ILOM*
-Stay connected and innovate. ✌🏻`; 
+© 2025 ILOM Platform
+Stay secure, stay connected! 🚀`;
+                        
                         await sock.sendMessage(sock.user.id, {
-text: desc,
-contextInfo: {
-externalAdReply: {
-title: "ɪʟᴏᴍ",
-thumbnailUrl: "https://files.catbox.moe/bqs70b.jpg",
-sourceUrl: "https://ilom.bot",
-mediaType: 1,
-renderLargerThumbnail: true
-}  
-}
-},
-{quoted:code })
-                    } catch (e) {
-                            console.error('Session sending error:', e);
-                            let ddd = await sock.sendMessage(sock.user.id, { text: 'Session creation failed: ' + e.toString() });
-                            let desc = `*Hey there, ILOM User!* 👋🏻
-
-Thanks for using *ILOM* — your session has been successfully created!
-
-🔐 *Session ID:* Sent above  
-⚠️ *Keep it safe!* Do NOT share this ID with anyone.
-
-——————
-
-*✅ Stay Updated:*  
-Connect with ILOM Bot Network
-
-*💻 Source Code:*  
-Explore ILOM project capabilities
-
-——————
-
-> *© Powered by ILOM*
-Stay connected and innovate. ✌🏻`;
-                            await sock.sendMessage(sock.user.id, {
-text: desc,
-contextInfo: {
-externalAdReply: {
-title: "ɪʟᴏᴍ",
-thumbnailUrl: "https://i.imgur.com/GVW7aoD.jpeg",
-sourceUrl: "https://ilom.bot",
-mediaType: 2,
-renderLargerThumbnail: true,
-showAdAttribution: true
-}  
-}
-},
-{quoted:ddd })
+                            text: welcomeMessage,
+                            contextInfo: {
+                                externalAdReply: {
+                                    title: "ILOM - Session Connected",
+                                    body: "Advanced WhatsApp Bot Platform",
+                                    thumbnailUrl: "https://files.catbox.moe/bqs70b.jpg",
+                                    sourceUrl: "https://ilom.bot",
+                                    mediaType: 1,
+                                    renderLargerThumbnail: true
+                                }  
+                            }
+                        });
+                    } catch (sendError) {
+                        console.error('Message sending error:', sendError);
                     }
-                    await delay(10);
+                    
+                    await delay(100);
                     await sock.ws.close();
                     await removeFile('./temp/' + id);
-                    console.log(`👤 ${sock.user.id} ILOM Connected ✅ Session created successfully.`);
+                    console.log(`✅ ${sock.user.id} - Session created successfully`);
+                    
                 } else if (connection === "close" && lastDisconnect && lastDisconnect.error && lastDisconnect.error.output.statusCode != 401) {
-                    await delay(10);
+                    await delay(100);
                     ILOM_PAIR_CODE();
                 }
             });
+            
         } catch (err) {
-            console.log("service restated");
+            console.error("Service error:", err);
             await removeFile('./temp/' + id);
             if (!res.headersSent) {
-                await res.send({ code: "❗ Service Unavailable" });
+                await res.send({ code: "Service Unavailable" });
             }
         }
     }
-   return await ILOM_PAIR_CODE();
-});/*
-setInterval(() => {
-    console.log("☘️ 𝗥𝗲𝘀𝘁𝗮𝗿𝘁𝗶𝗻𝗴 𝗽𝗿𝗼𝗰𝗲𝘀𝘀...");
-    process.exit();
-}, 180000); //30min*/
+    
+    return await ILOM_PAIR_CODE();
+});
+
 module.exports = router;
