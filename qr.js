@@ -29,29 +29,20 @@ function ensureBase64Padding(base64String) {
 
 router.get('/', async (req, res) => {
     const id = makeid();
-    let qrSent = false;
     
     async function ILOM_QR_CODE() {
         const { state, saveCreds } = await useMultiFileAuthState('./temp/' + id);
         
         try {
-            const browsers = ["Chrome (Linux)", "Chrome (macOS)", "Safari (iOS)", "Firefox (Windows)"];
-            const randomBrowser = browsers[Math.floor(Math.random() * browsers.length)];
-            
             let sock = makeWASocket({
                 auth: {
                     creds: state.creds,
-                    keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "silent" }).child({ level: "silent" })),
+                    keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "silent" })),
                 },
                 printQRInTerminal: false,
-                logger: pino({ level: "silent" }).child({ level: "silent" }),
-                browser: Browsers.ubuntu(randomBrowser),
-                syncFullHistory: false,
-                markOnlineOnConnect: false,
-                generateHighQualityLinkPreview: true,
-                getMessage: async (key) => {
-                    return { conversation: '' };
-                }
+                logger: pino({ level: "silent" }),
+                browser: ['Chrome (Linux)', '', ''],
+                mobile: false,
             });
             
             sock.ev.on('creds.update', saveCreds);
@@ -59,24 +50,26 @@ router.get('/', async (req, res) => {
             sock.ev.on("connection.update", async (s) => {
                 const { connection, lastDisconnect, qr } = s;
                 
-                if (qr && !qrSent) {
+                if (qr) {
                     try {
-                        const qrBuffer = await QRCode.toBuffer(qr, {
-                            errorCorrectionLevel: 'H',
-                            type: 'png',
-                            quality: 1,
+                        const qrImage = await QRCode.toDataURL(qr, {
+                            errorCorrectionLevel: 'M',
+                            type: 'image/png',
+                            quality: 0.95,
                             margin: 1,
-                            scale: 8
+                            width: 300
                         });
-                        qrSent = true;
-                        res.writeHead(200, {
-                            'Content-Type': 'image/png',
-                            'Content-Length': qrBuffer.length,
-                            'Cache-Control': 'no-store, no-cache, must-revalidate',
-                            'Pragma': 'no-cache',
-                            'Expires': '0'
-                        });
-                        res.end(qrBuffer);
+                        
+                        const base64Data = qrImage.split(',')[1];
+                        const imgBuffer = Buffer.from(base64Data, 'base64');
+                        
+                        if (!res.headersSent) {
+                            res.writeHead(200, {
+                                'Content-Type': 'image/png',
+                                'Content-Length': imgBuffer.length
+                            });
+                            res.end(imgBuffer);
+                        }
                     } catch (qrError) {
                         console.error('✗ QR generation error:', qrError.message);
                         if (!res.headersSent) {
@@ -88,14 +81,12 @@ router.get('/', async (req, res) => {
                 if (connection == "open") {
                     await delay(5000);
                     
-                    let rf = __dirname + `/temp/${id}/creds.json`;
                     let sessionId;
-                    let sessionData;
-                    let credsJson;
                     
                     try {
-                        sessionData = fs.readFileSync(rf, 'utf8');
-                        credsJson = JSON.parse(sessionData);
+                        const rf = `./temp/${id}/creds.json`;
+                        const sessionData = fs.readFileSync(rf, 'utf8');
+                        const credsJson = JSON.parse(sessionData);
                         const base64Data = Buffer.from(sessionData).toString('base64');
                         const paddedBase64 = ensureBase64Padding(base64Data);
                         sessionId = "Ilom~" + paddedBase64;
@@ -116,10 +107,7 @@ router.get('/', async (req, res) => {
                     }
                     
                     try {
-                        await sock.sendMessage(sock.user.id, { 
-                            text: sessionId 
-                        });
-                        
+                        await sock.sendMessage(sock.user.id, { text: sessionId });
                         await delay(500);
                         
                         const welcomeMessage = `╔═══════════════════════════╗
@@ -128,7 +116,7 @@ router.get('/', async (req, res) => {
 
 *QR Connection Established Successfully*
 
-Your WhatsApp bot session is now fully operational via QR code pairing.
+Your WhatsApp bot session is now fully operational.
 
 ╔══════════════════════╗
 ║   SECURITY NOTICE    ║
@@ -138,37 +126,22 @@ Your WhatsApp bot session is now fully operational via QR code pairing.
 • Never share your session ID
 • Store in a secure location
 • Use only for authorized purposes
-• Regenerate if compromised
 
 ✓ *Platform Features*
 • AI-powered responses
 • Multi-device support  
 • Secure encryption
 • Real-time sync
-• Auto-backup
-
-📱 *Getting Started*
-1. Save your session ID securely
-2. Configure your bot settings
-3. Deploy to your preferred platform
-4. Monitor activity & logs
-
-🌐 *Need Support?*
-Visit our documentation for setup guides, API references, and troubleshooting help.
 
 ━━━━━━━━━━━━━━━━━━━━━━
 © 2025 ILOM Platform
 Secure • Reliable • Advanced
 ━━━━━━━━━━━━━━━━━━━━━━`;
                         
-                        await sock.sendMessage(sock.user.id, {
-                            text: welcomeMessage
-                        });
-                        
+                        await sock.sendMessage(sock.user.id, { text: welcomeMessage });
                         await delay(500);
-                        
                         await sock.sendMessage(sock.user.id, {
-                            text: "🎉 *Setup Complete!*\n\nYour bot is ready to use. Check the session ID above and keep it safe.\n\n_This message confirms your device has been successfully linked._"
+                            text: "🎉 *Setup Complete!*\n\nYour bot is ready to use. Check the session ID above and keep it safe."
                         });
                         
                     } catch (sendError) {
@@ -176,24 +149,32 @@ Secure • Reliable • Advanced
                     }
                     
                     await delay(1000);
-                    await sock.ws.close();
+                    
+                    try {
+                        await sock.ws.close();
+                    } catch (e) {}
                     
                     setTimeout(() => {
                         removeFile('./temp/' + id);
-                        console.log(`✓ Cleanup completed for: ${sock.user.id.split(':')[0]}`);
+                        console.log(`✓ Cleanup completed`);
                     }, 5000);
                     
-                } else if (connection === "close" && lastDisconnect && lastDisconnect.error && lastDisconnect.error.output.statusCode != 401) {
-                    if (!qrSent) {
-                        await delay(1000);
+                } else if (connection === "close") {
+                    const statusCode = lastDisconnect?.error?.output?.statusCode;
+                    if (statusCode !== 401 && statusCode !== 403) {
+                        console.log('Connection closed, retrying...');
+                        await delay(2000);
                         ILOM_QR_CODE();
+                    } else {
+                        console.log('Auth failed, cleaning up...');
+                        removeFile('./temp/' + id);
                     }
                 }
             });
             
         } catch (err) {
             console.error("✗ Service error:", err.message);
-            await removeFile('./temp/' + id);
+            removeFile('./temp/' + id);
             if (!res.headersSent) {
                 res.status(500).send('Service Unavailable');
             }
