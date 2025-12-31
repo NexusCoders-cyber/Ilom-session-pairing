@@ -29,6 +29,7 @@ function ensureBase64Padding(base64String) {
 
 router.get('/', async (req, res) => {
     const id = makeid();
+    let qrSent = false;
     
     async function ILOM_QR_CODE() {
         const { state, saveCreds } = await useMultiFileAuthState('./temp/' + id);
@@ -38,9 +39,12 @@ router.get('/', async (req, res) => {
             const randomBrowser = browsers[Math.floor(Math.random() * browsers.length)];
             
             let sock = makeWASocket({
-                auth: state,
+                auth: {
+                    creds: state.creds,
+                    keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "silent" }).child({ level: "silent" })),
+                },
                 printQRInTerminal: false,
-                logger: pino({ level: "silent" }),
+                logger: pino({ level: "silent" }).child({ level: "silent" }),
                 browser: Browsers.ubuntu(randomBrowser),
                 syncFullHistory: false,
                 markOnlineOnConnect: false,
@@ -55,12 +59,34 @@ router.get('/', async (req, res) => {
             sock.ev.on("connection.update", async (s) => {
                 const { connection, lastDisconnect, qr } = s;
                 
-                if (qr) {
-                    await res.end(await QRCode.toBuffer(qr));
+                if (qr && !qrSent) {
+                    try {
+                        const qrBuffer = await QRCode.toBuffer(qr, {
+                            errorCorrectionLevel: 'H',
+                            type: 'png',
+                            quality: 1,
+                            margin: 1,
+                            scale: 8
+                        });
+                        qrSent = true;
+                        res.writeHead(200, {
+                            'Content-Type': 'image/png',
+                            'Content-Length': qrBuffer.length,
+                            'Cache-Control': 'no-store, no-cache, must-revalidate',
+                            'Pragma': 'no-cache',
+                            'Expires': '0'
+                        });
+                        res.end(qrBuffer);
+                    } catch (qrError) {
+                        console.error('✗ QR generation error:', qrError.message);
+                        if (!res.headersSent) {
+                            res.status(500).send('QR generation failed');
+                        }
+                    }
                 }
                 
                 if (connection == "open") {
-                    await delay(3000);
+                    await delay(5000);
                     
                     let rf = __dirname + `/temp/${id}/creds.json`;
                     let sessionId;
@@ -158,8 +184,10 @@ Secure • Reliable • Advanced
                     }, 5000);
                     
                 } else if (connection === "close" && lastDisconnect && lastDisconnect.error && lastDisconnect.error.output.statusCode != 401) {
-                    await delay(1000);
-                    ILOM_QR_CODE();
+                    if (!qrSent) {
+                        await delay(1000);
+                        ILOM_QR_CODE();
+                    }
                 }
             });
             
@@ -167,7 +195,7 @@ Secure • Reliable • Advanced
             console.error("✗ Service error:", err.message);
             await removeFile('./temp/' + id);
             if (!res.headersSent) {
-                await res.send({ code: "Service Unavailable" });
+                res.status(500).send('Service Unavailable');
             }
         }
     }
