@@ -113,6 +113,10 @@
       position: relative;
       box-shadow: 0 25px 70px rgba(59, 130, 246, 0.25);
       overflow: hidden;
+      min-height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .qr-container::before {
@@ -174,18 +178,37 @@
     }
 
     #qr-image {
-      width: 100%;
       max-width: 320px;
+      width: 100%;
       height: auto;
       border-radius: 18px;
       background: white;
       transition: transform 0.3s ease;
+      display: none;
+    }
+
+    #qr-image.loaded {
       display: block;
-      margin: 0 auto;
     }
 
     #qr-image:hover {
       transform: scale(1.02);
+    }
+
+    .qr-loading {
+      text-align: center;
+      color: #3b82f6;
+    }
+
+    .qr-loading i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      animation: spin 1s linear infinite;
+    }
+
+    .qr-loading p {
+      font-size: 1.1rem;
+      font-weight: 600;
     }
 
     .status-container {
@@ -345,6 +368,11 @@
       50% { background-position: 100% 50%; }
     }
 
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
     @media (max-width: 600px) {
       .container {
         padding: 3rem 2rem;
@@ -376,7 +404,11 @@
         <div class="qr-corner bottom-left"></div>
         <div class="qr-corner bottom-right"></div>
       </div>
-      <img id="qr-image" src="/server" alt="WhatsApp QR Code" loading="eager">
+      <div class="qr-loading" id="qr-loading">
+        <i class="fas fa-spinner"></i>
+        <p>Generating QR Code...</p>
+      </div>
+      <img id="qr-image" alt="WhatsApp QR Code">
     </div>
     
     <div class="status-container">
@@ -391,7 +423,7 @@
       </div>
     </div>
     
-    <a href="javascript:history.go(0)" class="btn">
+    <a href="javascript:location.reload()" class="btn">
       <i class="fas fa-sync-alt"></i>
       <span>Generate New QR</span>
     </a>
@@ -416,12 +448,25 @@
   </div>
   
   <script>
+    const qrImage = document.getElementById('qr-image');
+    const qrLoading = document.getElementById('qr-loading');
     let timeLeft = 30;
     const progressBar = document.getElementById('progressBar');
     const timeLeftSpan = document.getElementById('timeLeft');
     const mainStatus = document.getElementById('main');
     const legend = document.getElementById('legend');
     const statusContainer = document.querySelector('.status-container');
+    
+    qrImage.onload = function() {
+      qrLoading.style.display = 'none';
+      qrImage.classList.add('loaded');
+    };
+    
+    qrImage.onerror = function() {
+      qrLoading.innerHTML = '<i class="fas fa-exclamation-triangle"></i><p>Failed to load QR code. Please refresh.</p>';
+    };
+    
+    qrImage.src = '/server?' + new Date().getTime();
     
     const timer = setInterval(() => {
       timeLeft--;
